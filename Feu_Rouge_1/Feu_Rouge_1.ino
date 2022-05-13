@@ -1,17 +1,31 @@
-#define LED_RED 17
-#define LED_GREEN 14
-#define LED_ORANGE 18
-#define Button_Pieton 25
-#define Button_RED_LED 26
-#define Button_1 
-#define Button_2 
-#define Button_3 
-#define Button_4 
-#define Button_5 
+#define Button_RED_LED 4
+#define Button_1 14
+#define Button_2 02
+#define Button_3 17
 
-#define Delay_Red 3000
+#define Delay_Red 5000
 #define Delay_Green 5000
-#define Orange_Wink 1000
+#define Orange_Wink 500
+
+
+
+#include "Adafruit_NeoPixel.h"
+#ifdef __AVR__
+    #include <avr/power.h>
+#endif
+
+// Which pin on the Arduino is connected to the NeoPixels?
+// On a Trinket or Gemma we suggest changing this to 1
+#define RGBLEDPIN            25
+
+// How many NeoPixels are attached to the Arduino?
+#define NUMPIXELS      10
+
+// When we setup the NeoPixel library, we tell it how many pixels, and which pin to use to send signals.
+// Note that for older NeoPixel strips you might need to change the third parameter--see the strandtest
+// example for more information on possible values.
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, RGBLEDPIN, NEO_GRB + NEO_KHZ800);
+
 
 const int buttonPin = 2;    // the number of the pushbutton pin
 const int ledPin = 13;      // the number of the LED pin
@@ -30,7 +44,7 @@ unsigned long debounceDelay = 50;    // the debounce time; increase if the outpu
 int Green_LED_State;
 int Red_LED_State;
 int Orange_LED_State;
-int Compt = 0;
+int counter = 0;
 int Button_Red_State;
 int Button_Pieton_State;
 
@@ -38,17 +52,15 @@ void Green_LED();
 void Red_LED();
 void Orange_LED();
 void IRAM_ATTR ISR();
+int myButtons[] = {Button_1, Button_2, Button_3};
 void setup() 
 {
   Serial.begin(9600);
-  pinMode(LED_RED, OUTPUT);
-  pinMode(LED_GREEN, OUTPUT);
-  pinMode(LED_ORANGE, OUTPUT);
-  pinMode(Button_Pieton, INPUT_PULLUP);
-  pinMode(Button_RED_LED, INPUT);
-  digitalWrite(LED_GREEN, HIGH);
-
-
+  pixels.setBrightness(255);
+  pixels.begin();
+  pixels.clear();
+  pixels.setPixelColor(2, pixels.Color(0, 150, 0)); // Moderately bright green color.
+  pixels.show();
   pinMode(buttonPin, INPUT);
   pinMode(ledPin, OUTPUT);
 
@@ -58,49 +70,54 @@ void setup()
 
 void loop() 
 {
-  int myButtons[] = {Button_1, Button_2, Button_3, Button_4, Button_5};
-  for(int i = 0; i <= 4; i++){
-  if(ReadingButton(myButtons[i]) == HIGH){
-    counter++;
-  }
-  if((ReadingButton() == LOW) && counter > 0){
-    counter--;
-  }
-  }
-  if(counter > 2){
-    Orange_LED();
+  
+  delay(1000);
+ 
+  //Serial.print(ReadingButton(myButtons[0]));
+  //Serial.print(ReadingButton(myButtons[1]));
+  if(((ReadingButton(myButtons[0]) == HIGH) && (ReadingButton(myButtons[1]) == HIGH) && (ReadingButton(myButtons[2]) == HIGH)) || (ReadingButton(Button_RED_LED) == HIGH) ) {
+   Orange_LED();
     Red_LED();
     Green_LED();
-   }
+  }
+  
+  
+ 
+   Serial.print(counter);
 }
 void Red_LED()
 {
-  Compt = 0;
-  digitalWrite(LED_RED, HIGH);
+  counter = 0;
+  pixels.clear();
+  pixels.setPixelColor(0, pixels.Color(255, 0, 0));
+  pixels.show();
   delay(Delay_Red);
-  digitalWrite(LED_RED, LOW);
+  pixels.clear();
   Green_LED();
   
 }
 void Orange_LED()
 {
-  digitalWrite(LED_GREEN, LOW);
+  pixels.clear();
   for (int i=0; i<5; i++)
   {
   delay (10);
-  digitalWrite(LED_ORANGE, HIGH);
+  pixels.setPixelColor(1, pixels.Color(255, 128, 0));
+  pixels.show();
   delay (Orange_Wink);
-  digitalWrite(LED_ORANGE, LOW);
+  pixels.clear();
   delay (Orange_Wink);
   }
 }
 void Green_LED()
 {
-  digitalWrite(LED_GREEN, HIGH);
+  pixels.clear();
+  pixels.setPixelColor(2, pixels.Color(0, 150, 0)); // Moderately bright green color.
+  pixels.show();
   delay(Delay_Green);
 }
 
-String ReadingButton(int Button){
+int ReadingButton(int Button){
   // read the state of the switch into a local variable:
   int reading = digitalRead(Button);
 

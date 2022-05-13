@@ -150,3 +150,19 @@ int ReadingButton(int Button){
   lastButtonState = reading;
   return lastButtonState;
 }
+
+int unittest(){
+  pixels.getPixelColor();
+  if((ReadingButton(Button_RED_LED) == LOW) && pixel.getPixelColor(1)== pixels.Color(255,0,0)) {
+    return 1;
+  }
+   if((ReadingButton(myButtons[0]) == LOW) && pixel.getPixelColor(1)==pixels.Color(255,0,0)) {
+    return 1;
+  }
+  if((ReadingButton(myButtons[1]) == LOW) && pixel.getPixelColor(1)==pixels.Color(255,0,0)) {
+    return 1;
+  }
+    if((ReadingButton(myButtons[2]) == LOW) && pixel.getPixelColor(1)==pixels.Color(255,0,0)) {
+    return 1;
+  }
+}
